@@ -1,35 +1,34 @@
-/*
- [auto_generated]
- libs/numeric/odeint/test/rosenbrock4.cpp
-
- [begin_description]
- This file tests the Rosenbrock 4 stepper and its controller and dense output stepper.
- [end_description]
-
- Copyright 2011-2012 Karsten Ahnert
- Copyright 2011 Mario Mulansky
-
- Distributed under the Boost Software License, Version 1.0.
- (See accompanying file LICENSE_1_0.txt or
- copy at http://www.boost.org/LICENSE_1_0.txt)
-
- */
-
-
 #include <iostream>
+#include <string>
+#include <cmath>
+#include <vector>
+// Optimization
+#define BOOST_UBLAS_NDEBUG
+#include <fstream>
+#include <exception>
+#include <string>
+#include <utility>
+#include <boost/array.hpp>
+#include <boost/numeric/odeint.hpp>
+#include <time.h>
+#include <stdlib.h>
 
-#include <boost/numeric/odeint/stepper/rosenbrock4.hpp>
-#include <boost/numeric/odeint/stepper/rosenbrock4_controller.hpp>
-#include <boost/numeric/ublas/vector.hpp>
-#include <boost/numeric/ublas/matrix.hpp>
 
 
+
+
+
+
+
+using namespace std;
 using namespace boost::numeric::odeint;
+using namespace boost::math::tools;
 
-typedef double value_type;
+// type definitions
+typedef double value_type;// or typedef float value_type;
 typedef boost::numeric::ublas::vector< value_type > state_type;
 typedef boost::numeric::ublas::matrix< value_type > matrix_type;
-
+typedef rosenbrock4< value_type > stepper_type;
 
 // constants
 const value_type pressure = 13.332237; //pascal soit 0.1 torr
@@ -105,18 +104,18 @@ cout <<"t"<<'\t'<<"Te"<<'\t'<<"SiH3"<<'\t'<<"SiH4"<<endl;
 
 // Time variables
   value_type t = 0.0;
-  value_type dt = 1.0e-9;
-  value_type Tmax = 1.e-3;
+  value_type dt = 1.0e-8;
+  value_type Tmax = 20.e-6;
   value_type NT = Tmax/dt;
 
   // Root finding variables
-  value_type min = 0.1;
+  value_type min = 0.001;
   value_type max = 20.0;
   boost::uintmax_t max_iter = 500;
  eps_tolerance<value_type> tol(30);
 
   // initial values
-  value_type Te = 1.0;
+  value_type Te = 3.0;
 
   // Density vectors and initial condition
   state_type n_ini(Nbr_espece, 0.0); // initial conditions
@@ -138,10 +137,10 @@ cout <<"t"<<'\t'<<"Te"<<'\t'<<"SiH3"<<'\t'<<"SiH4"<<endl;
  
 //t1=clock();
   // Find Te first calculation
-  pair<value_type, value_type> pair_Te =\
+ // pair<value_type, value_type> pair_Te =\
                 toms748_solve(etemp, min, max, tol, max_iter);
 
-  Te = pair_Te.first;
+  //Te = pair_Te.first;
   cerr << "\n[ii] Initial Temperature  = " << Te << endl;
 //t2=clock()-t1;
 //cout<<"timesec"<<(float )t2/CLOCKS_PER_SEC << endl;
@@ -169,10 +168,10 @@ if (i%((int)(NT/100))==0)
     write_density(t, Te, n_new);
 }
     // Find new Te
-    pair<value_type, value_type> pair_Te =\
+    //pair<value_type, value_type> pair_Te =\
                   toms748_solve(etemp, min, max, tol, max_iter);
 
-    Te = pair_Te.first;
+    //Te = pair_Te.first;
 
     t+= dt;
     n_ini = n_new;//update
