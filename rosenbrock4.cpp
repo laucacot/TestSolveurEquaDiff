@@ -144,7 +144,7 @@ if (i%((int)(NT/100))==0)
 
 
 
-cerr << "SiH3"<<n_new[0]<<'\t'<<"SiH4"<<n_new[1]<<endl;
+cerr << "SiH3"<<n_new[0]<<'\t'<<"SiH4"<<n_new[1]<<'\t'<<"H"<<n_new[2]<<endl;
 float Si=(n_new[0]+n_new[1])/n_SiH4_ini;
 
 cerr<<"Si="<<Si<<endl;
