@@ -122,7 +122,7 @@ if(g4!=100) {dndt[g4]=dndt[g4]+Tx;}
 struct jacobian
 {
     void operator()( const state_type &n , matrix_type &jacobi , const value_type &t , state_type &dfdt ) const
-    {
+    { 
         /*jacobi( 0 , 0 ) = 0;
         jacobi( 0 , 1 ) = k6*n_e;
         jacobi( 0 , 2 ) = 0;
@@ -135,6 +135,58 @@ struct jacobian
         dfdt( 0 ) = 0.0;
         dfdt( 1 ) = 0.0;
         dfdt( 2 ) = 0.0;*/
+
+state_type dndt(3,0.0);
+for (int i=0;i<3;i++)
+{for (int k=0;k<3;k++)
+jacobi(i,k)=0.0;
+}
+
+value_type p1,p2,g1,g2,g3,g4,Tp,Tx;
+state_type Kt(jmax, 0.0);
+int i=0;
+int k=0;
+for (int j=0;j<jmax;j++)
+{
+
+ p1=Tab[0][j];
+ p2=Tab[1][j];
+ g1=Tab[2][j];
+ g2=Tab[3][j];
+ g3=Tab[4][j];
+ g4=Tab[5][j]; 
+ Tp=(p2==10 or g3==10)?Te:Tg;
+
+ Kt[j]={Tab[6][j]*pow(Tp,Tab[7][j])*exp(-Tab[8][j]/Tp)};
+
+if (p1==200)
+{
+Tx=n_Ar*n[p2]*Kt[j];
+}
+else if (p2==100)
+{
+Tx=n[p1]*Kt[j];
+}
+else if (p2==10)
+{
+Tx=n[p1]*n_e*Kt[j];
+}
+else
+{
+Tx=n[p1]*n[p2]*Kt[j];
+}
+
+
+if(p1!=200) {dndt[p1]=dndt[p1]-Tx;}
+if(p2!=100 and p2!=10) {dndt[p2]=dndt[p2]-Tx;}
+if(g1!=200) {dndt[g1]=dndt[g1]+Tx;}
+if(g2!=100) {dndt[g2]=dndt[g2]+Tx;}
+if(g3!=100 and g3!=10) {dndt[g3]=dndt[g3]+Tx;}
+if(g4!=100) {dndt[g4]=dndt[g4]+Tx;}
+
+
+}
+
 for (int i=0;i<3;i++)
 {for (int k=0;k<3;k++) jacobi(i,k)=0;}
  
@@ -142,8 +194,9 @@ for (int i=0;i<3;i++)
 for (int i=0;i<3;i++)
 {for (int k=0;k<3;k++)
 
-if (p1==k) {jacobi(i,k)=jacobi(i,k)+dndt[p1]/n[k];}
-if (p2==k) {jacobi(i,k)=jacobi(i,k)+dndt[p2]/n[k];}
+if (p1== k) {jacobi(i,k)=jacobi(i,k)+dndt[p1]/n[k];}
+if (p2== k) {jacobi(i,k)=jacobi(i,k)+dndt[p2]/n[k];}
+
  dfdt(i)=0.0;
 }
    }
@@ -243,7 +296,7 @@ if (i%((int)(NT/100))==0)
 
 
 
-cerr << "SiH3"<<n_new[0]<<'\t'<<"SiH4"<<n_new[1]<<endl;
+cerr << "SiH3"<<'\t'<<n_new[0]<<'\n'<<"SiH4"<<'\t'<<n_new[1]<<'\n'<<"H"<<'\t'<<n_new[2]<<endl;
 float Si=(n_new[0]+n_new[1])/n_SiH4_ini;
 
 cerr<<"Si="<<Si<<endl;
