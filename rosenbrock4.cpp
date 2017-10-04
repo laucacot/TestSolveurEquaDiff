@@ -80,7 +80,7 @@ for (int j=0;j<jmax;j++)
  g2=Tab[3][j];
  g3=Tab[4][j];
  g4=Tab[5][j]; 
- Tp=(p2==0 or g3==0)?Te:Tg;
+ Tp=(p2==10 or g3==10)?Te:Tg;
 
  Kt[j]={Tab[6][j]*pow(Tp,Tab[7][j])*exp(-Tab[8][j]/Tp)};
 /*if (j==0)
@@ -108,10 +108,10 @@ Tx=n[p1]*n[p2]*Kt[j];
 
 
 if(p1!=200) {dndt[p1]=dndt[p1]-Tx;}
-if(p2!=100) {dndt[p2]=dndt[p2]-Tx;}
+if(p2!=100 and p2!=10) {dndt[p2]=dndt[p2]-Tx;}
 if(g1!=200) {dndt[g1]=dndt[g1]+Tx;}
 if(g2!=100) {dndt[g2]=dndt[g2]+Tx;}
-if(g3!=100) {dndt[g3]=dndt[g3]+Tx;}
+if(g3!=100 and g3!=10) {dndt[g3]=dndt[g3]+Tx;}
 if(g4!=100) {dndt[g4]=dndt[g4]+Tx;}
 
 
