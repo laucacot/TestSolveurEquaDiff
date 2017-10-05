@@ -136,7 +136,7 @@ struct jacobian
         dfdt( 1 ) = 0.0;
         dfdt( 2 ) = 0.0;*/
 
-state_type dndt(3,0.0);
+/*state_type dndt(3,0.0);
 for (int i=0;i<3;i++)
 {for (int k=0;k<3;k++)
 jacobi(i,k)=0.0;
@@ -185,8 +185,8 @@ if(g3!=100 and g3!=10) {dndt[g3]=dndt[g3]+Tx;}
 if(g4!=100) {dndt[g4]=dndt[g4]+Tx;}
 
 
-}
-
+}*/
+int k=0;
 for (int i=0;i<3;i++)
 {for (int k=0;k<3;k++) jacobi(i,k)=0;}
  
@@ -277,13 +277,13 @@ cout <<"t"<<'\t'<<"Te"<<'\t'<<"SiH3"<<'\t'<<"SiH4"<<'\t'<<"H"<<endl;
 
   // declare stepper Rosenbrock
   stepper_type stepper;
-
+//cerr<<"patate 1"<<endl;
   for (int i = 0; i <= NT; i++)
   {
 
     // Integrate at least one step dt
     stepper.do_step( std::make_pair( sys, jac ), n_new, t, dt, n_err);
-
+//cerr<<"patate 2"<<endl;
 
 if (i%((int)(NT/100))==0)
 {
