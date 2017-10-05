@@ -13,13 +13,6 @@
 #include <time.h>
 #include <stdlib.h>
 
-
-
-
-
-
-
-
 using namespace std;
 using namespace boost::numeric::odeint;
 using namespace boost::math::tools;
@@ -123,7 +116,7 @@ struct jacobian
 {
     void operator()( const state_type &n , matrix_type &jacobi , const value_type &t , state_type &dfdt ) const
     { 
-        /*jacobi( 0 , 0 ) = 0;
+        jacobi( 0 , 0 ) = 0;
         jacobi( 0 , 1 ) = k6*n_e;
         jacobi( 0 , 2 ) = 0;
         jacobi( 1 , 0 ) = 0;
@@ -134,7 +127,7 @@ struct jacobian
         jacobi( 2 , 2 ) = 0;
         dfdt( 0 ) = 0.0;
         dfdt( 1 ) = 0.0;
-        dfdt( 2 ) = 0.0;*/
+        dfdt( 2 ) = 0.0;
 
 /*state_type dndt(3,0.0);
 for (int i=0;i<3;i++)
@@ -185,7 +178,7 @@ if(g3!=100 and g3!=10) {dndt[g3]=dndt[g3]+Tx;}
 if(g4!=100) {dndt[g4]=dndt[g4]+Tx;}
 
 
-}*/
+}
 int k=0;
 for (int i=0;i<3;i++)
 {for (int k=0;k<3;k++) jacobi(i,k)=0;}
@@ -198,7 +191,7 @@ if (p1== k) {jacobi(i,k)=jacobi(i,k)+dndt[p1]/n[k];}
 if (p2== k) {jacobi(i,k)=jacobi(i,k)+dndt[p2]/n[k];}
 
  dfdt(i)=0.0;
-}
+}*/
    }
 
 };
