@@ -13,15 +13,17 @@
 #include <time.h>
 #include <stdlib.h>
 
+#include <boost/phoenix/core.hpp>
+#include <boost/phoenix/operator.hpp>
+
 using namespace std;
 using namespace boost::numeric::odeint;
 using namespace boost::math::tools;
+namespace phoenix = boost::phoenix;
 
 // type definitions
 typedef double value_type;// or typedef float value_type;
-typedef boost::numeric::ublas::vector< value_type > state_type;
-typedef boost::numeric::ublas::matrix< value_type > matrix_type;
-typedef rosenbrock4< value_type > stepper_type;
+typedef vector< value_type > state_type;
 
 // constants
 const value_type pressure = 13.332237; //pascal soit 0.1 torr
@@ -49,9 +51,10 @@ state_type Kt(jmax, 0.0);
 const float   k6=1.83E-9*pow((Te),-1)*exp(-(10.68)/(Te));
 
 
-struct nsystem
+struct stiff_system
 {
-    void operator()( const state_type &n , state_type &dndt , const value_type &t ) 
+    inline
+    void operator()( const state_type &n , state_type &dndt , const value_type &t ) const
     { /*0=SiH3  1=SiH4  2=H
         dndt( 0 ) = k6*n_e*n(1);
         dndt( 1 ) =-k6*n_e*n(1) ;
@@ -112,7 +115,7 @@ if(g4!=100) {dndt[g4]=dndt[g4]+Tx;}
 }
 };
 
-struct jacobian
+/*struct jacobian
 {
     void operator()( const state_type &n , matrix_type &jacobi , const value_type &t , state_type &dfdt ) const
     { 
@@ -129,72 +132,10 @@ struct jacobian
         dfdt( 1 ) = 0.0;
         dfdt( 2 ) = 0.0;
 
-/*state_type dndt(3,0.0);
-for (int i=0;i<3;i++)
-{for (int k=0;k<3;k++)
-jacobi(i,k)=0.0;
-}
 
-value_type p1,p2,g1,g2,g3,g4,Tp,Tx;
-state_type Kt(jmax, 0.0);
-int i=0;
-int k=0;
-for (int j=0;j<jmax;j++)
-{
-
- p1=Tab[0][j];
- p2=Tab[1][j];
- g1=Tab[2][j];
- g2=Tab[3][j];
- g3=Tab[4][j];
- g4=Tab[5][j]; 
- Tp=(p2==10 or g3==10)?Te:Tg;
-
- Kt[j]={Tab[6][j]*pow(Tp,Tab[7][j])*exp(-Tab[8][j]/Tp)};
-
-if (p1==200)
-{
-Tx=n_Ar*n[p2]*Kt[j];
-}
-else if (p2==100)
-{
-Tx=n[p1]*Kt[j];
-}
-else if (p2==10)
-{
-Tx=n[p1]*n_e*Kt[j];
-}
-else
-{
-Tx=n[p1]*n[p2]*Kt[j];
-}
-
-
-if(p1!=200) {dndt[p1]=dndt[p1]-Tx;}
-if(p2!=100 and p2!=10) {dndt[p2]=dndt[p2]-Tx;}
-if(g1!=200) {dndt[g1]=dndt[g1]+Tx;}
-if(g2!=100) {dndt[g2]=dndt[g2]+Tx;}
-if(g3!=100 and g3!=10) {dndt[g3]=dndt[g3]+Tx;}
-if(g4!=100) {dndt[g4]=dndt[g4]+Tx;}
-
-
-}
-int k=0;
-for (int i=0;i<3;i++)
-{for (int k=0;k<3;k++) jacobi(i,k)=0;}
- 
-   
-for (int i=0;i<3;i++)
-{for (int k=0;k<3;k++)
-
-if (p1== k) {jacobi(i,k)=jacobi(i,k)+dndt[p1]/n[k];}
-if (p2== k) {jacobi(i,k)=jacobi(i,k)+dndt[p2]/n[k];}
-
- dfdt(i)=0.0;
-}*/
    }
 
-};
+};*/
 
 
 
@@ -264,39 +205,42 @@ cout <<"t"<<'\t'<<"Te"<<'\t'<<"SiH3"<<'\t'<<"SiH4"<<'\t'<<"H"<<endl;
 
   cerr << "\n[ii] Initial Temperature  = " << Te << endl;
 
-  // declare system and jacobian
-  nsystem sys;
-  jacobian jac;
 
-  // declare stepper Rosenbrock
-  stepper_type stepper;
+  stiff_system* ssys = new stiff_system();
+
+  auto stepper = make_controlled(1.0e-8, 1.0e-8,
+                                runge_kutta_cash_karp54< state_type >());
+  
 //cerr<<"patate 1"<<endl;
-  for (int i = 0; i <= NT; i++)
-  {
 
-    // Integrate at least one step dt
-    stepper.do_step( std::make_pair( sys, jac ), n_new, t, dt, n_err);
+size_t num_of_steps = integrate_adaptive(stepper, *ssys, n_new,
+                                           t, Tmax, 0.01,
+ cout << phoenix::arg_names::arg2 << '\t'
+                             << phoenix::arg_names::arg1[0] << '\t'
+                             << phoenix::arg_names::arg1[1] << '\t'
+		 << phoenix::arg_names::arg1[2] <<'\t'						
+                             << phoenix::arg_names::arg1[1]
+                            *phoenix::arg_names::arg1[1] << "\n" );
+  
 //cerr<<"patate 2"<<endl;
 
-if (i%((int)(NT/100))==0)
-{
-    write_density(t, Te, n_new);
-}
-
-    t+= dt;
-    n_ini = n_new;//update
-  }
 
 
 
-cerr << "SiH3"<<'\t'<<n_new[0]<<'\n'<<"SiH4"<<'\t'<<n_new[1]<<'\n'<<"H"<<'\t'<<n_new[2]<<endl;
-float Si=(n_new[0]+n_new[1])/n_SiH4_ini;
+ cerr << "\n[ii] Number of steps: " <<  num_of_steps << endl;
 
-cerr<<"Si="<<Si<<endl;
+//cerr << "SiH3"<<'\t'<<n_new[0]<<'\n'<<"SiH4"<<'\t'<<n_new[1]<<'\n'<<"H"<<'\t'<<n_new[2]<<endl;
+//float Si=(n_new[0]+n_new[1])/n_SiH4_ini;
 
-float H=(3*n_new[0]+4*n_new[1]+n_new[2])/(4*n_SiH4_ini);
+//cerr<<"Si="<<Si<<endl;
 
-cerr<<"H="<<H<<endl;
+//float H=(3*n_new[0]+4*n_new[1]+n_new[2])/(4*n_SiH4_ini);
+
+//cerr<<"H="<<H<<endl;
+
+// deallocate memory for ssys
+  delete(ssys);
+
   return 0;
 
 }  
